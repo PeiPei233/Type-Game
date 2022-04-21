@@ -4,29 +4,31 @@
 #include "libgraphics.h"
 #include "extraimgui.h"
 
-double height, width;
-double speed = 1;
-int tottime = 0, isplaying = 0;
+double height, width;	//the size of window
+double speed = 1;	//the speed of game
+int tottime = 0;	//tottime: the total time of game
+int isplaying = 0;
 double score = 0;
-char currentLetter;
-int thistime;
+char currentLetter;	//current dropping letter
+int thistime;	//the dropping time of current letter
 
 typedef struct {
 	double score;
 	int time;
 	time_t date;
-}Ranking;
-int cntrank = 0;
+}Ranking;	//ranking data
+int cntrank = 0;	//the number of ranking
 Ranking rank[100];
-int isShowRanking = 0, currentRanking = 0;
+int isShowRanking = 0;
+int currentRanking = 0;	//the ranking of the game played this time
 int isExitGame = 0;
 int isShowingHelp = 0;
 
-char inputAns[1010] = "You have entered:";
+char inputAns[1010] = "You have entered:";	//the answer characteristic user input
 char *colorTable[] = {
 	"Black", "Dark Gray", "Gray", "Light Gray", "Brown", "Red", "Orange", "Yellow", "Green", "Blue", "Violet", "Magenta", "Cyan"
 };	//0~12
-int currentColor = 10;
+int currentColor = 10;	//current input area color
 
 void display();
 
@@ -50,26 +52,29 @@ void KeyboardEventProcess(int key, int event) {
 #define COLOR_CHANGE 2
 
 void TimerEventProcess(int timerID) {
-	if (timerID == REFRESH_INTERVAL && isplaying) {
+	if (timerID == REFRESH_INTERVAL && isplaying) {	//dropping
 		tottime+=40;
 		thistime+=40;
 		display();
 	}
-	if (timerID == COLOR_CHANGE && isplaying) {
+	if (timerID == COLOR_CHANGE && isplaying) {	//color change
 		currentColor = RandomInteger(0, 12);
 		display();
 	}
 }
 
 void Main() {
+
+	SetWindowTitle("Type Game");
+
 	InitGraphics();
-	InitConsole();
+	// InitConsole();
 	
 	height = GetWindowHeight();
 	width = GetWindowWidth();
 
+	//Get ranking data from rank.txt
 	memset(rank, 0, sizeof(rank));
-
 	FILE *fp = fopen("rank.txt", "rb");
 	fread(&cntrank, sizeof(int), 1, fp);
 	fread(rank, sizeof(rank[0]), sizeof(rank) / sizeof(rank[0]), fp);
@@ -95,7 +100,7 @@ void Main() {
 void ExitPlaying() {
 	isShowRanking = 1;
 	isExitGame = 1;
-	Ranking t;
+	Ranking t;	//temporary
 	t.score = score;
 	t.time = tottime;
 	time(&t.date);
@@ -106,7 +111,7 @@ void ExitPlaying() {
 		int i;
 		int p = cntrank + 1;
 		for (i = 1; i <= cntrank; i++) {
-			if (rank[i].score < score) {
+			if (rank[i].score < score) {	//insert current rank into the ranking list
 				p = i;
 				break;
 			} else if (rank[i].score == score && rank[i].time > tottime) {
@@ -126,10 +131,13 @@ void ExitPlaying() {
 		}
 		currentRanking = p;
 	}
+	//save the ranking list
 	FILE *fp = fopen("rank.txt", "wb");
 	fwrite(&cntrank, sizeof(int), 1, fp);
 	fwrite(rank, sizeof(rank[0]), sizeof(rank) / sizeof(rank[0]), fp);
 	fclose(fp);
+
+	//show the ranking list when exit
 	display();
 }
 
@@ -155,34 +163,34 @@ void DrawMenu() {
 	int selection;
 	selection = menuList(GenUIID(0), x, y - h, w, wlist, h, menuListSettings, sizeof(menuListSettings) / sizeof(menuListSettings[0]));
 	switch (selection) {
-		case 1:
+		case 1:		//Start
 			isplaying = 1;
 			thistime = 0;
 			currentLetter = RandomInteger(0, 25) + 'A';
 			break;
-		case 2:
+		case 2:		//Pause
 			isplaying = 0;
 			break;
-		case 3:
+		case 3:		//Speed Up
 			speed += 0.1;
 			break;
-		case 4:
+		case 4:		//Slow Down
 			if (speed > 0.1) speed -= 0.1;
 			else speed = 0.1;
 			break;
-		case 5:
+		case 5:		//Exit
 			ExitPlaying();
 			break;
 	}
 
 	selection = menuList(GenUIID(0), x + w, y - h, w, wlist, h, menuListAbout, sizeof(menuListAbout) / sizeof(menuListAbout[0]));
 	switch (selection) {
-	case 1:
+	case 1:		//Help
 		isShowingHelp = 1;
 		isShowRanking = 0;
 		break;
 	
-	case 2:
+	case 2:		//Exit
 		isShowRanking = 1;
 		isShowingHelp = 0;
 		break;
@@ -253,7 +261,7 @@ void DrawLetterPart() {
 	SetPenColor("Blue");
 	SetPointSize(30);
 	double fH = GetFontHeight();
-	if (thistime * speed * h / 1600 > h - fH) {
+	if (thistime * speed * h / 1600 > h - fH) {	//update current letter when dropping to the floor
 		thistime = 0;
 		currentLetter = RandomInteger(0, 25) + 'A';
 	}
