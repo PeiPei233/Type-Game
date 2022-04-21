@@ -3,6 +3,7 @@
 
 #include "imgui.h"
 
-void DrawTextStringWithWidth(char *s,double x, double y, double tw, double th);
+
+void DrawTextStringWithinArea(char *s,double x, double y, double w, double h, double th);
 
 #endif

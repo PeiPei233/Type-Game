@@ -26,7 +26,9 @@ char inputAns[1010] = "You have entered:";
 char *colorTable[] = {
 	"Black", "Dark Gray", "Gray", "Light Gray", "Brown", "Red", "Orange", "Yellow", "Green", "Blue", "Violet", "Magenta", "Cyan"
 };	//0~12
-int currentColor = 9;
+int currentColor = 10;
+
+void display();
 
 void MouseEventProcess(int x, int y, int button, int event) {
 	uiGetMouse(x, y, button, event);
@@ -62,7 +64,7 @@ void TimerEventProcess(int timerID) {
 void Main() {
 	InitGraphics();
 	InitConsole();
-
+	
 	height = GetWindowHeight();
 	width = GetWindowWidth();
 
@@ -245,9 +247,11 @@ void DrawLetterPart() {
 	double w = width * 6 / 16;
 	double h = height * 11.5 / 16;
 	SetPenColor(colorTable[currentColor]);
+	SetPenSize(4);
 	drawRectangle(x, y, w, h, 0);
+	SetPenSize(1);
 	SetPenColor("Blue");
-	SetPointSize(25);
+	SetPointSize(30);
 	double fH = GetFontHeight();
 	if (thistime * speed * h / 1600 > h - fH) {
 		thistime = 0;
@@ -274,14 +278,14 @@ void DrawInputPart() {
 		if (isplaying) inputAns[strlen(inputAns)] = ans;
 		printf("IN:%c\n", ans);
 		sprintf(input, "Enter the Letter Here:");
-		if (ans == currentLetter && isplaying) {
+		if ((ans == currentLetter || ans + 'A' - 'a' == currentLetter) && isplaying) {
 			score += speed;
 			currentLetter = RandomInteger(0, 25) + 'A';
 			thistime = 0;
 		}
 	}
 	SetPenColor("Gray");
-	DrawTextStringWithWidth(inputAns, x + w / 10, y + h * 3 / 4 - fH * 1.5, w * 8 / 10, th);
+	DrawTextStringWithinArea(inputAns, x + w / 10, y + h * 3 / 4, w * 8 / 10, h * 3 / 4, th);
 	SetPenColor("Blue");
 }
 
@@ -370,7 +374,7 @@ void DrawHelp() {
 	SetPointSize(18);
 	fH = GetFontHeight();
 	SetPenColor("Black");
-	DrawTextStringWithWidth("\
+	DrawTextStringWithinArea("\
     Welcome! Thank you for playing this simple game programmed by PeiPei!\nYou can stars this project at https://github.com/PeiPei233/Type_Game\n\
   Rules:\n\
     1. Get Start: Press Start button / Setting > Start / Ctrl+S\n\
@@ -381,7 +385,7 @@ void DrawHelp() {
   Attention:\n\
     1. Every time you exit, your typing score and time will be recorded and you will see the Ranking List with your rank this time.\n\
     2. There exist some known bugs, and we do not want to fix them.\
-	", x + w / 18, y + h - fH * 1.6 * 3, w * 16 / 18, fH * 1.5);
+	", x + w / 18, y + h - fH * 1.6 * 2, w * 16 / 18, h - 1.6 * fH * 2, fH * 1.5);
 
 
 	SetPointSize(15);
