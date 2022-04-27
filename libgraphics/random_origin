@@ -38,7 +38,7 @@ void Randomize(void)
  * (3) Truncate the value to an integer.
  * (4) Translate it to the appropriate starting point.
  */
-static int lastRandomInteger = 1<<31;
+
 int RandomInteger(int low, int high)
 {
     int k;
@@ -46,8 +46,7 @@ int RandomInteger(int low, int high)
 
     d = (double) rand() / ((double) RAND_MAX + 1);
     k = (int) (d * (high - low + 1));
-    if (low + k == lastRandomInteger && low != high) return RandomInteger(low, high);
-    else return lastRandomInteger = low + k;
+    return (low + k);
 }
 
 /*
